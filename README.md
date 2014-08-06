@@ -29,6 +29,3 @@ More often than not, the limits on new native threads hit by the OutOfMemoryErro
 When your application is spawning thousands of threads then chances are that something has gone terribly wrong – there are 
 not many applications out there which would benefit from such a vast amount of threads.
 
-So you could go ahead and start taking thread dumps to analyze the situation. This would take days. Or you might try out 
-Plumbr to find out what is causing this problem and how to cure it in just minutes.
-
