@@ -28,7 +28,11 @@ O formato binário pode ser aberto com as ferramentas: jstack (JDK), jVisualVM (
 
 O formato texto pode ser aberto com as ferramentas: jVisualVM (JDK), IBM Thread Analizer ou qualquer outro profiler Java que reconheça dump de threads Java.
 
-NOTA: o procedimento acima causam o travamento das threads (equivalente ao efeito Stop The World do FullGC). Portanto utilize com cautela em ambiente de produção!
+NOTAS:
+
+    O arquivo de dump no formato hprof pode ser aberto com os utilizatários jVisualvm (fornecido pelo JDK) ou Eclipse Memory Analizer (MAT).  É necessário que a versão e arquitetura do JDK utilizado na análise dump seja idêntica à JVM utilizada pelo servidor de aplicação onde o erro ocorreu.
+    Para que o comando gcore (invocado pela JVM após o evento de erro) funcione é necessário que o pacote gdb (A GNU source-level debugger for C, C++, Fortran and other languages) esteja devidamente instalado no Sistema Operacional.
+    O procedimento acima causam o travamento das threads (equivalente ao efeito Stop The World do FullGC). Portanto utilize com cautela em ambiente de produção!
 
 -------------------------------------------------------------
 The following example is creating and starting new threads in a loop. When running the code, operating system limits 
