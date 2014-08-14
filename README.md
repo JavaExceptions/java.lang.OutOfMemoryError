@@ -33,7 +33,58 @@ NOTAS:
     O arquivo de dump no formato hprof pode ser aberto com os utilizatários jVisualvm (fornecido pelo JDK) ou Eclipse Memory Analizer (MAT).  É necessário que a versão e arquitetura do JDK utilizado na análise dump seja idêntica à JVM utilizada pelo servidor de aplicação onde o erro ocorreu.
     Para que o comando gcore (invocado pela JVM após o evento de erro) funcione é necessário que o pacote gdb (A GNU source-level debugger for C, C++, Fortran and other languages) esteja devidamente instalado no Sistema Operacional.
     O procedimento acima causam o travamento das threads (equivalente ao efeito Stop The World do FullGC). Portanto utilize com cautela em ambiente de produção!
+-------------------------------------------------------------
+Resolution as Red Hat:
 
+Decrease the JVM process size:
+    Explicitly set the thread stack size. The reason for this is that the default value can be 1024kB and a typical thread stack size of 128K or 256K is usually adequate. See How do I set Java thread stack size?.
+    Decrease the amount of memory reserved for the heap and/or perm gen space.
+    Upgrade from JDK 1.5 to JDK 1.6 or OpenJDK 1.6 to take advantage of the more efficient memory mapping of jar files that significantly reduces JVM memory consumption. JDK 1.5 memory maps entire jar files, whereas JDK 1.6 and OpenJDK 1.6 only memory maps a central directory.
+    Use a preferred or supported Windows service wrapper to ensure that options are being passed to the JVM. See What is the preferred method of running JBoss AS as a Windows Service?.
+
+    Increase the amount of available and/or contiguous address space:
+    For 32-bit Windows, set the 3GB switch.
+        Not supported as of JDK 1.6.
+        Can potentially cause "out of kernel address space" issues under heavy network/io load.
+    Uninstall any non-essential software to avoid shared libraries with preferred memory loading locations like Windows DLLs from fragmenting address space.
+    Move to 64-bit where there is no memory split and no 4GB limit.
+
+    Increase OS limits on the number of threads:
+    Set a higher ulimit for open files in /etc/security/limits.conf on Linux. For example:
+
+        soft    nofile           1024
+        hard    nofile           8192
+
+    or to set both hard and soft to the same value:
+
+        - nofile 2048
+
+    Set higher ulimit for max user processes in /etc/security/limits.conf on Linux.
+    For example:
+
+        soft    nproc           2048
+        hard    nproc           8192
+        
+    For RHEL 6, a modification to /etc/security/limits.d/90-nproc.conf is needed rather than /etc/security/limits.conf, refer article for more details.
+
+    If the maximum number of threads will increase beyond the default allowed (32768) you will need to increase this limit in /etc/sysctl.conf. This value is controlled by pid_max, and to double this value the following line would be added:
+
+        kernel.pid_max = 65536
+
+    Decrease the number of threads.
+    If you have applications that use JSF, try the following settings in their web.xml:
+
+  <context-param>
+    <param-name>facelets.REFRESH_PERIOD</param-name>
+    <param-value>-1</param-value>
+  </context-param>
+  <context-param>
+    <param-name>facelets.DEVELOPMENT</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
+    Avoid running multiple copies of the same application by ensuring it's fully stopped before restarting.
+    
 -------------------------------------------------------------
 The following example is creating and starting new threads in a loop. When running the code, operating system limits 
 are reached fast and “java.lang.OutOfMemoryError: Unable to create new native thread” message will be displayed.
